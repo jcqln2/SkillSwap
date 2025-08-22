@@ -1,93 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skill Swap</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: url('https://ethereum.foundation/assets/EF-website-landscape-ef-03-8000px.webp') no-repeat center center/cover;
-      font-family: Arial, sans-serif;
-      color: white;
-      position: relative;
-    }
-
-    /* Lighter overlay for better readability */
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.3); /* reduced from 0.55 */
-      z-index: 0;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      background: rgba(0, 0, 0, 0.35); /* reduced from 0.6 */
-      padding: 40px;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
-    }
-
-    h1 {
-      font-size: 2em;
-      margin-bottom: 20px;
-    }
-
-    input[type="text"] {
-      padding: 16px 12px;
-      width: 80%;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      margin-bottom: 20px;
-    }
-
-    button {
-      padding: 12px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background-color: #627eea;
-      color: white;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #4b5bbd;
-    }
-
-    p {
-      margin-top: 20px;
-      font-size: 1em;
-    }
-
-    .options {
-      margin-top: 15px;
-      font-size: 0.95em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swap Skills</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background: url('https://ethereum.foundation/assets/EF-website-landscape-ef-03-8000px.webp') no-repeat center center/cover;
+            min-height: 100vh; /* Ensures body covers viewport */
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            margin: 10px;
+            padding: 8px;
+            font-size: 16px;
+        }
+        #skillsList {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Swap Skills</h1>
-    <input type="text" placeholder="What skill do you want to swap?">
-    <br>
-    <button>Find a Match</button>
-    <p>Trade skills or contribute using local currency / crypto</p>
-  </div>
+    <div class="container">
+        <h1>Swap Skills</h1>
+        <p>Find a Match</p>
+        <p>Trade skills or contribute using local currency / crypto</p>
+
+        <!-- Skill Management Section -->
+        <div>
+            <h2>Add Your Skills</h2>
+            <input type="text" id="skillInput" placeholder="Enter a skill (e.g., Web Development)">
+            <button onclick="addSkill()">Add Skill</button>
+            <div id="skillsList"></div>
+        </div>
+
+        <!-- Ethereum Payment Section -->
+        <div>
+            <h2>Send Ethereum</h2>
+            <input type="text" id="recipientAddress" placeholder="Recipient Ethereum Address">
+            <input type="number" id="ethAmount" placeholder="Amount in ETH" step="0.01">
+            <button onclick="connectMetaMask()">Connect MetaMask</button>
+            <button onclick="sendEth()" disabled id="sendEthButton">Send ETH</button>
+            <p id="walletStatus"></p>
+            <p id="errorMessage" class="error"></p>
+        </div>
+    </div>
+
+    <script>
+        // Skill Management
+        function addSkill() {
+            const skillInput = document.getElementById('skillInput');
+            const skill = skillInput.value.trim();
+            if (skill) {
+                let skills = JSON.parse(localStorage.getItem('skills') || '[]');
+                skills.push(skill);
+                localStorage.setItem('skills', JSON.stringify(skills));
+                skillInput.value = '';
+                displaySkills();
+            }
+        }
+
+        function displaySkills() {
+            const skillsList = document.getElementById('skillsList');
+            const skills = JSON.parse(localStorage.getItem('skills') || '[]');
+            skillsList.innerHTML = '<h3>Your Skills:</h3>';
+            if (skills.length === 0) {
+                skillsList.innerHTML += '<p>No skills added yet.</p>';
+            } else {
+                const ul = document.createElement('ul');
+                skills.forEach(skill => {
+                    const li = document.createElement('li');
+                    li.textContent = skill;
+                    ul.appendChild(li);
+                });
+                skillsList.appendChild(ul);
+            }
+        }
+
+        window.onload = displaySkills;
+
+        // MetaMask Integration
+        let web3;
+        let userAccount;
+
+        async function connectMetaMask() {
+            if (window.ethereum) {
+                try {
+                    web3 = new Web3(window.ethereum);
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    document.getElementById('walletStatus').textContent = `Connected: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+                    document.getElementById('sendEthButton').disabled = false;
+                } catch (error) {
+                    document.getElementById('errorMessage').textContent = 'Failed to connect to MetaMask. Please try again.';
+                }
+            } else {
+                document.getElementById('errorMessage').textContent = 'MetaMask is not installed. Please install it to send ETH.';
+            }
+        }
+
+        async function sendEth() {
+            const recipient = document.getElementById('recipientAddress').value;
+            const amount = document.getElementById('ethAmount').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (!web3.utils.isAddress(recipient)) {
+                errorMessage.textContent = 'Invalid Ethereum address.';
+                return;
+            }
+            if (!amount || amount <= 0) {
+                errorMessage.textContent = 'Please enter a valid ETH amount.';
+                return;
+            }
+
+            try {
+                const tx = await web3.eth.sendTransaction({
+                    from: userAccount,
+                    to: recipient,
+                    value: web3.utils.toWei(amount, 'ether')
+                });
+                errorMessage.textContent = `Transaction successful! Hash: ${tx.transactionHash}`;
+            } catch (error) {
+                errorMessage.textContent = `Transaction failed: ${error.message}`;
+            }
+        }
+    </script>
 </body>
 </html>
