@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Swap</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url('https://ethereum.foundation/assets/EF-website-landscape-ef-03-8000px.webp') no-repeat center center/cover;
+      font-family: Arial, sans-serif;
+      color: white;
+      position: relative;
+    }
+
+    /* Lighter overlay for better readability */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3); /* reduced from 0.55 */
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.35); /* reduced from 0.6 */
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 16px 12px;
+      width: 80%;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #627eea;
+      color: white;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4b5bbd;
+    }
+
+    p {
+      margin-top: 20px;
+      font-size: 1em;
+    }
+
+    .options {
+      margin-top: 15px;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Swap Skills</h1>
+    <input type="text" placeholder="What skill do you want to swap?">
+    <br>
+    <button>Find a Match</button>
+    <p>Trade skills or contribute using local currency / crypto</p>
+  </div>
+</body>
+</html>
